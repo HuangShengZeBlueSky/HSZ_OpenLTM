@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints
+datasets/
+results/
+*.csv
+*.npy
+*.npz
+*.pth
+*.pt
+*.ckpt
+*.log
+.vscode/
