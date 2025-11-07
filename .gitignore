@@ -1,13 +1,19 @@
 __pycache__/
 *.py[cod]
 *.ipynb_checkpoints
+.vscode/
+logs/
+*.log
+
+# 数据与大文件
 datasets/
 results/
+data/
+dataset/
+checkpoints/
 *.csv
 *.npy
 *.npz
 *.pth
 *.pt
 *.ckpt
-*.log
-.vscode/
