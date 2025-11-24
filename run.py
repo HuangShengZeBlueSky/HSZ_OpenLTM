@@ -33,7 +33,9 @@ if __name__ == '__main__':
     parser.add_argument('--test_pred_len', type=int, default=96, help='test pred len')
 
     parser.add_argument('--percentile', type=float, default=99, help='Percentile for anomaly detection')
-
+    # [新增] 投票率参数: 定义有多少比例的点异常，才判定样本异常
+    # 默认值 0.01 表示 1%
+    parser.add_argument('--vote_rate', type=float, default=0.01, help='Ratio of anomaly points to trigger sample alarm')
     # model define
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
     parser.add_argument('--e_layers', type=int, default=1, help='encoder layers')

@@ -84,7 +84,10 @@ class Exp_Forecast_TestAll2(Exp_Forecast):
         csv_files = sorted([f for f in os.listdir(test_folder) if f.endswith(".csv")])
         
         # 定义投票比例：比如 1% (0.01) 的点异常，则判定该样本异常
-        vote_rate = 0.01 
+        # [修改] 使用 args.vote_rate
+        vote_rate = getattr(self.args, 'vote_rate', 0.01)
+        print(f"  策略配置: 阈值分位数={percentile}%, 异常点投票率={vote_rate*100}%")
+
         
         for csv_file in csv_files:
             print(f">>> Testing: {csv_file}")
