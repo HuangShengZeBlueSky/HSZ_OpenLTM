@@ -41,8 +41,15 @@ class Exp_Forecast(Exp_Basic):
             model.load_state_dict(torch.load(self.args.pretrain_model_path))
         return model
 
-    def _get_data(self, flag):
-        data_set, data_loader = data_provider(self.args, flag)
+    # [修改前]
+    # def _get_data(self, flag):
+    #    data_set, data_loader = data_provider(self.args, flag)
+    #    return data_set, data_loader
+
+    # [修改后] - 增加 **kwargs
+    def _get_data(self, flag, **kwargs):
+        # 把接收到的额外参数（比如 test_data_path）继续传给 data_provider
+        data_set, data_loader = data_provider(self.args, flag, **kwargs)
         return data_set, data_loader
 
     def _select_optimizer(self):

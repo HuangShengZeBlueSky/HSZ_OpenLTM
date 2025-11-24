@@ -5,6 +5,8 @@ import numpy as np
 import torch
 import torch.distributed as dist
 from exp.exp_forecast import Exp_Forecast
+from exp.testall_exp_anomaly_detection import Exp_Forecast_TestAll
+from exp.exp_AnomalyDetection import Exp_Forecast_TestAll2
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Timer-XL')
@@ -29,6 +31,8 @@ if __name__ == '__main__':
     parser.add_argument('--output_token_len', type=int, default=96, help='output token length')
     parser.add_argument('--test_seq_len', type=int, default=672, help='test seq len')
     parser.add_argument('--test_pred_len', type=int, default=96, help='test pred len')
+
+    parser.add_argument('--percentile', type=float, default=99, help='Percentile for anomaly detection')
 
     # model define
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
@@ -128,8 +132,12 @@ if __name__ == '__main__':
     
     if args.task_name == 'forecast':
         Exp = Exp_Forecast
+    elif args.task_name == 'forecast_test_all':  # <-- [!!] 添加这个新分支
+        Exp = Exp_Forecast_TestAll
+    elif args.task_name == 'forecast_test_all2':  # <-- [!!] 添加这个新分支
+        Exp = Exp_Forecast_TestAll2
     else:
-        Exp = Exp_Forecast
+        raise ValueError("task_name not defined")
 
     if args.is_training:
         for ii in range(args.itr):

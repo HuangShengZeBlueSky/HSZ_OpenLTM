@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
 import warnings
+from sklearn.preprocessing import StandardScaler
 warnings.filterwarnings('ignore')
 
 
@@ -686,3 +687,119 @@ class UTSD_Npy(Dataset):
 
     def __len__(self):
         return self.n_window_list[-1]
+    
+
+class BJTUAnomalyloader(Dataset):
+    def __init__(self, root_path, seq_len, patch_len, flag="train", test_data_path=None, **kwargs):
+        self.root_path = root_path
+        self.seq_len = seq_len
+        self.patch_len = patch_len
+        self.flag = flag
+        self.test_data_path = test_data_path
+        
+        # 核心逻辑: 步长 (训练=1, 测试=跳跃)
+        self.stride = 1 if self.flag == "train" or self.flag == "valid" or self.flag == "val" else self.seq_len - 2 * self.patch_len
+        if self.stride < 1: self.stride = 1 
+
+        # ==========================================
+        # [核心修复] 路径逻辑优化
+        # ==========================================
+        if self.flag == "train":
+            # 如果 root_path 已经以 'train' 结尾，就不再重复拼接
+            if self.root_path.rstrip('/').endswith('train'):
+                self.dataset_file_path = self.root_path
+            else:
+                # 否则尝试拼接
+                candidate_path = os.path.join(self.root_path, "train")
+                # 如果拼接后的存在，就用拼接的；否则还是用原路径
+                if os.path.exists(candidate_path):
+                    self.dataset_file_path = candidate_path
+                else:
+                    self.dataset_file_path = self.root_path
+            
+            self.data = self.load_data(self.dataset_file_path, is_train=True, is_valid=False)
+
+        elif self.flag == "valid" or self.flag == "val":
+            # 验证集同理，指向 train 文件夹
+            if self.root_path.rstrip('/').endswith('train'):
+                self.dataset_file_path = self.root_path
+            else:
+                candidate_path = os.path.join(self.root_path, "train")
+                if os.path.exists(candidate_path):
+                    self.dataset_file_path = candidate_path
+                else:
+                    self.dataset_file_path = self.root_path
+
+            self.data = self.load_data(self.dataset_file_path, is_train=True, is_valid=True)
+
+        elif self.flag == "test":
+            # 测试集逻辑保持不变
+            if self.test_data_path is None and 'data_path' in kwargs:
+                 self.test_data_path = os.path.join(self.root_path, kwargs['data_path'])
+            
+            if self.test_data_path and not os.path.exists(self.test_data_path):
+                 self.test_data_path = os.path.join(self.root_path, self.test_data_path)
+
+            # 兜底：如果还没找到，尝试直接用 data_path
+            if not self.test_data_path and 'data_path' in kwargs:
+                 self.test_data_path = kwargs['data_path']
+
+            assert self.test_data_path is not None, "test_data_path required"
+            self.data = self.load_data(self.test_data_path, is_train=False, is_valid=False)
+        
+        # 归一化逻辑 (接收外部 scaler 或自己 fit)
+        if 'scaler' in kwargs and kwargs['scaler'] is not None:
+            self.scaler = kwargs['scaler']
+            self.data = self.scaler.transform(self.data)
+        else:
+            self.scaler = StandardScaler()
+            self.data = self.scaler.fit_transform(self.data)
+
+    def load_data(self, folder_path, is_train=True, is_valid=False):
+        data_list = []
+        
+        # 1. 确定文件路径
+        if is_train:
+            if os.path.isdir(folder_path):
+                csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
+                csv_files.sort()
+                # 优先选那个 _2d.csv 结尾的（如果有的话），防止读错文件
+                # 这里我们假设文件夹里只有一个目标 csv，或者第一个就是对的
+                target_file = csv_files[0]
+                file_path = os.path.join(folder_path, target_file)
+            else:
+                file_path = folder_path
+        else:
+            file_path = folder_path
+
+        # 2. 强壮读取逻辑 (兼容有头/无头)
+        df = pd.read_csv(file_path, header=None)
+        df = df.apply(pd.to_numeric, errors='coerce') # 强转数字
+        df.dropna(inplace=True) # 删掉标题行
+        data = df.values
+        
+        # 3. 切分逻辑
+        total_data_size = len(data)
+        if is_train:
+            if is_valid:
+                data = data[int(total_data_size * 0.8):]
+            else:
+                data = data[:int(total_data_size * 0.8)]
+            data_list.append(data)
+        else:
+            data_list.append(data)
+        
+        return np.vstack(data_list)
+
+    def __len__(self):
+        return (self.data.shape[0] - self.seq_len) // self.stride + 1
+
+    def __getitem__(self, index):
+        index = index * self.stride
+        seq_x = self.data[index:index + self.seq_len, :]
+        seq_y = self.data[index:index + self.seq_len, :] 
+        
+        seq_x_mark = torch.zeros((seq_x.shape[0], 1))
+        seq_y_mark = torch.zeros((seq_y.shape[0], 1))
+        
+        return seq_x, seq_y, seq_x_mark, seq_y_mark

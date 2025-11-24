@@ -1,0 +1,113 @@
+File: 1370_电腐蚀 copy.csv
+  Forecast: mse:1.0699, mae:0.5080
+  Anomaly: rate:0.787848
+
+File: 1370_电腐蚀.csv
+  Forecast: mse:1.0699, mae:0.5080
+  Anomaly: rate:0.787848
+
+File: 1370_电腐蚀 copy.csv
+  Forecast: mse:1.0699, mae:0.5080
+  Anomaly: rate:0.787848
+
+File: 1370_电腐蚀.csv
+  Forecast: mse:1.0699, mae:0.5080
+  Anomaly: rate:0.787848
+
+File: 正常.csv
+  Forecast: mse:0.9300, mae:0.7666
+  Anomaly: rate:0.521946
+
+File: 1370_电腐蚀 copy.csv
+  Forecast: mse:1.0699, mae:0.5080
+  Anomaly: rate:0.787848
+
+File: 1370_电腐蚀.csv
+  Forecast: mse:1.0699, mae:0.5080
+  Anomaly: rate:0.787848
+
+File: 正常.csv
+  Forecast: mse:0.9300, mae:0.7666
+  Anomaly: rate:0.521946
+
+File: 1370_电腐蚀 copy.csv
+  Threshold: 1.000000
+  Anomaly Rate: 0.4550
+
+File: 1370_电腐蚀.csv
+  Threshold: 1.000000
+  Anomaly Rate: 0.4550
+
+File: 正常.csv
+  Threshold: 1.000000
+  Anomaly Rate: 0.2903
+
+File: 1370_电腐蚀 copy.csv
+  Threshold: 1.312739
+  Anomaly Rate: 0.3476
+
+File: 1370_电腐蚀.csv
+  Threshold: 1.312739
+  Anomaly Rate: 0.3476
+
+File: 正常.csv
+  Threshold: 1.312739
+  Anomaly Rate: 0.0070
+
+File: 1370_电腐蚀 copy.csv
+  Threshold: 1.373277
+  Samples: 1024
+  Anomaly Rate: 0.2812
+
+File: 1370_电腐蚀.csv
+  Threshold: 1.373277
+  Samples: 1024
+  Anomaly Rate: 0.2812
+
+File: 正常.csv
+  Threshold: 1.373277
+  Samples: 1024
+  Anomaly Rate: 0.0000
+
+File: 1370_电腐蚀 copy.csv
+  Threshold: 1.373277
+  Samples: 1024
+  Anomaly Rate: 0.2812
+
+File: 1370_电腐蚀.csv
+  Threshold: 1.373277
+  Samples: 1024
+  Anomaly Rate: 0.2812
+
+File: 正常.csv
+  Threshold: 1.373277
+  Samples: 1024
+  Anomaly Rate: 0.0000
+
+File: 1370_电腐蚀 copy.csv
+  Threshold: 1.044016
+  Samples: 1024
+  Anomaly Rate: 0.4951
+
+File: 1370_电腐蚀.csv
+  Threshold: 1.044016
+  Samples: 1024
+  Anomaly Rate: 0.4951
+
+File: 正常.csv
+  Threshold: 1.044016
+  Samples: 1024
+  Anomaly Rate: 0.1279
+
+File: 1370_电腐蚀 copy.csv, Rate: 0.2566
+File: 1370_电腐蚀.csv, Rate: 0.2566
+File: 正常.csv, Rate: 0.0000
+File: 1370_电腐蚀 copy.csv, Rate: 0.3274
+File: 1370_电腐蚀.csv, Rate: 0.3274
+File: 正常.csv, Rate: 0.0265
+File: 1370_电腐蚀 copy.csv, Rate: 0.8142
+File: 1370_电腐蚀.csv, Rate: 0.8142
+File: 正常.csv, Rate: 0.0265
+File: 1370_电腐蚀 copy.csv, Rate: 0.8142
+File: 1370_电腐蚀.csv, Rate: 0.8142
+File: 正常.csv, Rate: 0.0265

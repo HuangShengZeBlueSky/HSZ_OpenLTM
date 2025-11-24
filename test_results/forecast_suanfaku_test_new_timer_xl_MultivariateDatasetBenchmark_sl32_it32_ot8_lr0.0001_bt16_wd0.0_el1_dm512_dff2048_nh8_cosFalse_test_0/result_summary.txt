@@ -1,0 +1,40 @@
+File: 1370_内圈_test.csv
+  Forecast: mse:1.1158, mae:0.6949
+  Anomaly: rate:0.074046
+
+File: 1370_内外圈_test.csv
+  Forecast: mse:1.0176, mae:0.7918
+  Anomaly: rate:0.092417
+
+File: 1370_外圈_test.csv
+  Forecast: mse:1.0321, mae:0.7101
+  Anomaly: rate:0.074406
+
+File: 1370_正常_test.csv
+  Forecast: mse:0.9552, mae:0.7758
+  Anomaly: rate:0.060615
+
+File: 1370_电腐蚀_test.csv
+  Forecast: mse:1.0587, mae:0.5100
+  Anomaly: rate:0.288273
+
+File: 1370_内圈_test.csv
+  Forecast: mse:1.1158, mae:0.6949
+  Anomaly: rate:0.074046
+
+File: 1370_内外圈_test.csv
+  Forecast: mse:1.0176, mae:0.7918
+  Anomaly: rate:0.092417
+
+File: 1370_外圈_test.csv
+  Forecast: mse:1.0321, mae:0.7101
+  Anomaly: rate:0.074406
+
+File: 1370_正常_test.csv
+  Forecast: mse:0.9552, mae:0.7758
+  Anomaly: rate:0.060615
+
+File: 1370_电腐蚀_test.csv
+  Forecast: mse:1.0587, mae:0.5100
+  Anomaly: rate:0.288273
+

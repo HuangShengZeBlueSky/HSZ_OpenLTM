@@ -7,7 +7,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 # --- 任务与模型ID ---
 task_name="forecast"
-model_id="suanfaku_test"  # [重要] 实验的唯一ID。测试时将通过此ID查找模型。
+model_id="算法库一键测试"  # [重要] 实验的唯一ID。测试时将通过此ID查找模型。
 model_name="timer"      # 要使用的模型 (timer, timer_xl, moment, autotimes)
 
 # --- 训练数据路径 (Training Paths) ---
@@ -16,7 +16,7 @@ train_root_path="/home/ubuntu/hsz/OpenLTM_data_backup/datasets/永济电机轴�
 train_data_path="train_data.csv"
 
 # --- 核心模型参数 (Model Hyperparameters) ---
-n_vars=2              # [!!] 必须与你的 .csv 文件中的列数（序列数）匹配
+n_vars=1              # [!!] 必须与你的 .csv 文件中的列数（序列数）匹配
 seq_len=32            # 训练时的输入长度
 input_token_len=32    # Patch 长度
 output_token_len=8    # 预测的 Patch 长度
@@ -29,7 +29,7 @@ n_heads=8
 
 # --- 训练与GPU参数 ---
 batch_size=16
-train_epochs=5
+train_epochs=1
 gpu_id=0
 learning_rate=0.0001
 weight_decay=0
