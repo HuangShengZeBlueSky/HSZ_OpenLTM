@@ -7,7 +7,7 @@ export CUDA_VISIBLE_DEVICES=0
 # [!!] 关键：使用自定义的“一键测试”任务
 task_name="forecast_test_all2" 
 
-model_id="工况1转速12"     # 必须与训练一致
+model_id="工况1—转速1370转每分钟"     # 必须与训练一致
 model_name="timer_xl"          # 必须与训练一致
 data_name="BJTU"               # 必须与训练一致
 
@@ -15,7 +15,7 @@ data_name="BJTU"               # 必须与训练一致
 # 2. 数据路径
 # =========================================================
 # 指向包含所有测试 .csv 的文件夹
-test_root_path="/home/ubuntu/hsz/OpenLTM_data_backup/datasets/中车研究院实验台数据集/工况1_转速12转每秒/test"
+test_root_path="/home/ubuntu/zhaojia/永济电机轴承数据集/工况1_转速为1370转每分钟/test"
 test_data_path="" # 留空，脚本会自动遍历文件夹
 
 # =========================================================
@@ -30,7 +30,7 @@ percentile=99.9
 # =========================================================
 # 4. 模型参数 (必须与训练完全一致，不可改)
 # =========================================================
-n_vars=2
+n_vars=3
 seq_len=4608
 input_token_len=96
 output_token_len=96
@@ -38,7 +38,7 @@ test_seq_len=4608
 test_pred_len=96
 d_model=256
 d_ff=512
-e_layers=4
+e_layers=2
 n_heads=8
 
 # =========================================================
@@ -50,7 +50,7 @@ gpu_id=0
 # =========================================================
 # 6. 执行命令
 # =========================================================
-cd /home/ubuntu/hsz/OpenLTM 
+cd /home/ubuntu/zhaojia/OpenLTM 
 
 echo ">>>>>>> 1. 查找检查点..."
 CKPT_DIR=$(ls -1dt checkpoints/forecast_${model_id}_${model_name}_* | head -n1 | xargs -n1 basename)
