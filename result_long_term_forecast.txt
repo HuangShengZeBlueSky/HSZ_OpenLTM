@@ -46,3 +46,9 @@ mse:0.003717640647664666, mae:0.04296812787652016
 forecast_工况1—转速1370转每分钟_timer_xl_BJTU_sl4608_it96_ot96_lr0.001_bt2048_wd0_el2_dm256_dff512_nh8_cosFalse_test_0  
 mse:0.00029609212651848793, mae:0.010350893251597881
 
+forecast_工况1—转速1370转每分钟_微调_timer_xl_BJTU_sl2880_it96_ot96_lr5e-06_bt256_wd0_el8_dm1024_dff2048_nh8_cosFalse_test_0  
+mse:0.006086329463869333, mae:0.06080339103937149
+
+forecast_工况1_转速12转每秒_微调_timer_xl_BJTU_sl2880_it96_ot96_lr5e-06_bt256_wd0_el8_dm1024_dff2048_nh8_cosFalse_test_0  
+mse:0.006086329463869333, mae:0.06080339103937149
+
