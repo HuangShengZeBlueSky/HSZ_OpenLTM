@@ -54,22 +54,54 @@ class Model(nn.Module):
 
     def _get_inner_model(self, model_name):
         """
-            !!! you can also load model locally or load your own model
+        Modified: Load model locally from /home/ubuntu/hsz/models
+        注意本地模型的绝对路径
         """
-        print("> loading model: ", model_name)
+        import os
+        print(f"> initializing model structure: {model_name}")
+
+        # === 核心配置：本地模型绝对路径 ===
+        # 这些路径基于我们昨天下载确认过的位置
+        local_paths = {
+            "LLAMA": "/home/ubuntu/hsz/models/NousResearch/Llama-2-7b-hf", 
+            "OPT":   "/home/ubuntu/hsz/models/opt-125m",
+            "GPT2":  "/home/ubuntu/hsz/models/gpt2"
+        }
+
+        # 获取目标路径
+        target_path = local_paths.get(model_name)
+        
+        # 路径检查逻辑
+        if target_path and os.path.exists(target_path):
+            print(f"> Loading LOCAL model from: {target_path}")
+            load_path = target_path
+        else:
+            print(f"> WARNING: Local path {target_path} not found! Fallback to online string (Might fail without internet).")
+            # 保底逻辑：如果本地没找到，回退到在线 ID
+            if model_name == "LLAMA": load_path = "meta-llama/Llama-2-7b"
+            elif model_name == "OPT": load_path = "facebook/opt-125m"
+            elif model_name == "GPT2": load_path = "openai-community/gpt2"
+
+        # === 加载模型 (注意显存优化) ===
         if model_name == "OPT":
-            self.model = OPTForCausalLM.from_pretrained("facebook/opt-125m", torch_dtype=torch.float16)
+            self.model = OPTForCausalLM.from_pretrained(load_path, torch_dtype=torch.float16)
             self.model.model.decoder.project_in = None
             self.model.model.decoder.project_out = None
             self.hidden_dim = 2048
+            
         elif model_name == "LLAMA":
-            self.model = LlamaForCausalLM.from_pretrained("meta-llama/Llama-2-7b", torch_dtype=torch.float32)
+            # 注意：如果显存不够(比如在3090/4090上)，把 float32 改成 float16
+            #self.model = LlamaForCausalLM.from_pretrained(load_path, torch_dtype=torch.float32)
+            self.model = LlamaForCausalLM.from_pretrained(load_path, torch_dtype=torch.float16)  
             self.hidden_dim = 4096
+            
         elif model_name == "GPT2":
-            self.model = GPT2Model.from_pretrained("openai-community/gpt2") 
+            self.model = GPT2Model.from_pretrained(load_path) 
             self.hidden_dim = 768
+            
         else:
             raise NotImplementedError(f"Model {model_name} not supported")
+            
         print("> loading model done")
         
     def forecast(self, x_enc, x_mark_enc, x_mark_dec):
