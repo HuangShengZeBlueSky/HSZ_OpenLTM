@@ -101,7 +101,7 @@ mkdir -p "$LOG_DIR"  # 如果不存在就创建
 echo ">>>>>>> 日志将保存到: $LOG_DIR/"
 
 # 可选：总日志文件（取消注释下面一行即可启用）
-# TOTAL_LOG="$LOG_DIR/all_experiments.log"
+TOTAL_LOG="$LOG_DIR/_${model_id}_${model_name}_all_experiments.log"
 
 # =========================================================
 # 6. 循环测试
@@ -113,13 +113,15 @@ for param in "${PARAMS[@]}"; do
     echo ">>> 测试: model=${model_id}/${model_name}, p=${percentile}, v=${vote_rate}"
     echo "=========================================="
     
-    # 安全处理文件名：替换空格、斜杠等为下划线
-    safe_model_id=$(echo "$model_id" | sed 's/[\/[:space:]]/_/g')
-    safe_model_name=$(echo "$model_name" | sed 's/[\/[:space:]]/_/g')
-    safe_p=$(echo "$percentile" | tr '.' '_')
-    safe_v=$(echo "$vote_rate" | tr '.' '_')
-    
-    LOG_FILE="$LOG_DIR/${safe_model_id}__${safe_model_name}__p${safe_p}_v${safe_v}.log"
+    # 写入分隔信息到总日志（通过 echo + tee）
+    {
+        echo ""
+        echo "=================================================="
+        echo ">>> 实验开始: p=${percentile}, v=${vote_rate}"
+        echo ">>> Start time: $(date)"
+        echo "=================================================="
+    } | tee -a "$TOTAL_LOG"
+
 
     
     # 构建命令（注意：\ 后不能有空行！）
@@ -147,44 +149,19 @@ for param in "${PARAMS[@]}"; do
       --n_heads "$n_heads" \
       --percentile "$percentile" \
       --vote_rate "$vote_rate" \
-      2>&1 | tee "$LOG_FILE"
+      2>&1 | tee -a "$TOTAL_LOG"
     
-    echo ">>> 日志已保存至: $LOG_FILE"
-    
-    # 如果要汇总到总日志（取消下面两行注释）
-    # echo -e "\n\n===== p=${percentile}, v=${vote_rate} =====" >> "$TOTAL_LOG"
-    # cat "$INDIVIDUAL_LOG" >> "$TOTAL_LOG"
-    
+    # 记录结束时间
+    {
+        echo ""
+        echo ">>> End time: $(date)"
+        echo ">>> 本次实验结束: p=${percentile}, v=${vote_rate}"
+        echo ""
+    } | tee -a "$TOTAL_LOG"
+
+    echo ">>> 已记录到总日志: $TOTAL_LOG"
     echo ""
 done
 
 echo "✅ 所有调参实验完成！结果在 ./$LOG_DIR/ 目录下。"
 
-
-
-# echo ">>>>>>> 开始 BJTU 测试：${percentile}% 阈值 + ${vote_rate*100}% 投票率"
-
-# python run.py \
-#   --task_name "$task_name" \
-#   --is_training 0 \
-#   --model_id "$model_id" \
-#   --model "$model_name" \
-#   --data "$data_name" \
-#   --root_path "$test_root_path" \
-#   --data_path "$test_data_path" \
-#   --n_vars "$n_vars" \
-#   --seq_len "$seq_len" \
-#   --input_token_len "$input_token_len" \
-#   --output_token_len "$output_token_len" \
-#   --test_seq_len "$test_seq_len" \
-#   --test_pred_len "$test_pred_len" \
-#   --batch_size "$batch_size" \
-#   --gpu "$gpu_id" \
-#   --test_dir "$(basename "$CKPT_DIR")" \
-#   --test_file_name "checkpoint.pth" \
-#   --d_model "$d_model" \
-#   --d_ff "$d_ff" \
-#   --e_layers "$e_layers" \
-#   --n_heads "$n_heads" \
-#   --percentile "$percentile" \
-#   --vote_rate "$vote_rate" 
