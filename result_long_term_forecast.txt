@@ -52,3 +52,9 @@ mse:0.006086329463869333, mae:0.06080339103937149
 forecast_工况1_转速12转每秒_微调_timer_xl_BJTU_sl2880_it96_ot96_lr5e-06_bt256_wd0_el8_dm1024_dff2048_nh8_cosFalse_test_0  
 mse:0.006086329463869333, mae:0.06080339103937149
 
+forecast_工1转12防止过拟合_autotimes_BJTU_sl4608_it96_ot96_lr0.001_bt32_wd0_el2_dm64_dff128_nh4_cosFalse_test_0  
+mse:0.44991785287857056, mae:0.5237908363342285
+
+forecast_工1转12防止过拟合_autotimes_BJTU_sl4608_it96_ot96_lr0.001_bt32_wd0_el2_dm64_dff128_nh4_cosFalse_test_0  
+mse:0.5411326289176941, mae:0.4914635121822357
+

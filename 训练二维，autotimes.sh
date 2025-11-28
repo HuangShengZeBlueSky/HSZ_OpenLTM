@@ -1,5 +1,5 @@
 #!/bin/bash
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 
 # =========================================================
 # 1. 基础配置 (Basic Config)
@@ -8,7 +8,7 @@ task_name="forecast"           # 标准预测任务用于训练
 model_id="工1转12防止过拟合"   # [修改] 新名字，避免覆盖
 model_name="autotimes"          # 架构名保持不变，我们通过参数控制大小
 data_name="BJTU"               # 使用我们修复好的 BJTU 加载器
-
+llm_model="OPT"
 # =========================================================
 # 2. 数据路径 (Data Paths)
 # =========================================================
@@ -39,8 +39,8 @@ n_heads=4             # 原来 8   -> 改为 4
 # =========================================================
 # 4. 训练超参数
 # =========================================================
-batch_size=4096       
-train_epochs=2        
+batch_size=32       
+train_epochs=15        
 learning_rate=0.001   
 
 # =========================================================
@@ -69,4 +69,5 @@ python run.py \
   --d_model $d_model \
   --d_ff $d_ff \
   --e_layers $e_layers \
-  --n_heads $n_heads
+  --n_heads $n_heads\
+  --llm_model $llm_model

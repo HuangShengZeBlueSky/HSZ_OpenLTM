@@ -15,8 +15,10 @@ class Exp_Forecast_TestAll2(Exp_Forecast):
             print('loading model')
             setting = self.args.test_dir
             best_model_path = self.args.test_file_name
-            checkpoint = torch.load(os.path.join(self.args.checkpoints, setting, best_model_path))
-            self.model.load_state_dict(checkpoint)
+            checkpoint_path = os.path.join(self.args.checkpoints, setting, best_model_path)
+            checkpoint = torch.load(checkpoint_path, map_location='cpu')
+            missing, unexpected = self.model.load_state_dict(checkpoint, strict=False)
+            print(f">> 忽略的 OPT 参数数: {len(missing)}, 额外键: {unexpected}")
         self.model.eval()
         
         out_root = './test_results/' + setting + '/'
