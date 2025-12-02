@@ -114,3 +114,6 @@ mse:0.03302484378218651, mae:0.07378071546554565
 forecast_Kaist单一训练_timer_xl_BJTU_sl2880_it96_ot96_lr5e-06_bt256_wd0_el8_dm1024_dff2048_nh8_cosFalse_test_0  
 mse:0.008566180244088173, mae:0.07345729321241379
 
+forecast_Kaist变工训练_timer_xl_BJTU_sl2880_it96_ot96_lr5e-06_bt256_wd0_el8_dm1024_dff2048_nh8_cosFalse_test_0  
+mse:0.009330607950687408, mae:0.06710157543420792
+
