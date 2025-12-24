@@ -7,6 +7,8 @@ import torch.distributed as dist
 from exp.exp_forecast import Exp_Forecast
 from exp.testall_exp_anomaly_detection import Exp_Forecast_TestAll
 from exp.exp_AnomalyDetection import Exp_Forecast_TestAll2
+from exp.TestInOnce import Exp_Forecast_TestAll3
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Timer-XL')
@@ -34,8 +36,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--percentile', type=float, default=99, help='Percentile for anomaly detection')
     # [新增] 投票率参数: 定义有多少比例的点异常，才判定样本异常
-    # 默认值 0.01 表示 1%
-    parser.add_argument('--vote_rate', type=float, default=0.01, help='Ratio of anomaly points to trigger sample alarm')
+# 修改后：默认值改为 1.0 (代表 1%)
+    parser.add_argument('--vote_rate', type=float, default=1.0, help='Ratio of anomaly points (%) to trigger sample alarm')
     # model define
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
     parser.add_argument('--e_layers', type=int, default=1, help='encoder layers')
@@ -105,8 +107,10 @@ if __name__ == '__main__':
     # for AutoTimes: Currently, LLAMA, GPT2, and OPT are supported.
     parser.add_argument("--llm_model", type=str, default="LLAMA", help="LLM model, LLAMA, GPT2, BERT, OPT are supported") 
     parser.add_argument("--llm_layers", type=int, default=6, help="number of layers in llm")
+    parser.add_argument("--local_path", type=str, default="/home/ubuntu/hsz/models", help="base directory for local LLM weights")
     
     args = parser.parse_args()
+    args.vote_rate = args.vote_rate / 100.0
     fix_seed = args.seed
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
@@ -138,6 +142,8 @@ if __name__ == '__main__':
         Exp = Exp_Forecast_TestAll
     elif args.task_name == 'forecast_test_all2':  # <-- [!!] 添加这个新分支
         Exp = Exp_Forecast_TestAll2
+    elif args.task_name == 'forecast_test_all3':  # <-- [!!] 添加这个新分支
+        Exp = Exp_Forecast_TestAll3
     else:
         raise ValueError("task_name not defined")
 

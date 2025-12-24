@@ -36,6 +36,7 @@ class Model(nn.Module):
         self.mlp_hidden_dim = configs.d_model
         self.mlp_layers = configs.e_layers
         self.use_norm = configs.use_norm
+        self.local_path = getattr(configs, "local_path", "/home/ubuntu/hsz/models")
         
         # load inner model
         self._get_inner_model(self.model_name)
@@ -68,13 +69,20 @@ class Model(nn.Module):
         """
         import os
         print(f"> initializing model structure: {model_name}")
+        base_local_path = self.local_path
+        if base_local_path:
+            llama_dir = os.path.join(base_local_path, "Llama-2-7b-hf")
+            opt_dir = os.path.join(base_local_path, "opt-125m")
+            gpt2_dir = os.path.join(base_local_path, "gpt2")
+        else:
+            llama_dir = "/raid/hsz/models/Llama-2-7b-hf"
+            opt_dir = "/raid/hsz/models/opt-125m"
+            gpt2_dir = "/raid/hsz/models/gpt2"
 
-        # === 核心配置：本地模型绝对路径 ===
-        # 这些路径基于我们昨天下载确认过的位置
         local_paths = {
-            "LLAMA": "/home/ubuntu/hsz/models/NousResearch/Llama-2-7b-hf", 
-            "OPT":   "/home/ubuntu/hsz/models/opt-125m",
-            "GPT2":  "/home/ubuntu/hsz/models/gpt2"
+            "LLAMA": llama_dir,
+            "OPT":   opt_dir,
+            "GPT2":  gpt2_dir,
         }
 
         # 获取目标路径
