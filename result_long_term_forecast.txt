@@ -1,0 +1,3 @@
+forecast_永济工况1_转速1370转每秒LLAMA_autotimes_BJTU_sl2880_it96_ot96_lr0.0001_bt2_wd0_el8_dm1024_dff2048_nh8_cosFalse_test_0  
+mse:0.31703051924705505, mae:0.44792377948760986
+

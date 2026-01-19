@@ -1,148 +1,544 @@
-# OpenLTM
+# 基于OpenLTM的时序大模型异常检测功能：包含timerXL系列的异常检测功能实现，以及autotimes功能的实现。
 
-OpenLTM is an open codebase aiming to provide a pipeline to develop and evaluate large time-series models.
+使用环境 conda activate openltm 
 
-> For deep time series models and benchmarks, we recommend [Time-Series-Library](https://github.com/thuml/Time-Series-Library) and this comprehensive [Survey](https://arxiv.org/abs/2407.13278).
-
-> You can try out our out-of-the-box time series foundation models in [Large-Time-Series-Model](https://github.com/thuml/Large-Time-Series-Model) or [HuggingFace](https://huggingface.co/collections/thuml/time-series-foundation-models-67c80ace73299239b651d954).
-
-## Updates
-
-
-:triangular_flag_on_post: **News** (2025.05) We release 260B pre-trained [Timer](https://arxiv.org/abs/2410.04803) for model adaptation. This [notebook](./load_pth_ckpt.ipynb) shows how to load and use the checkpoint。
-
-:triangular_flag_on_post: **News** (2025.04) Many thanks for the implementation of [TTMs](https://arxiv.org/pdf/2401.03955) and other LLM4TS methods from [frndtls](https://github.com/frndtls).
-
-:triangular_flag_on_post: **News** (2024.12) Many thanks for the implementation of [GPT4TS](https://arxiv.org/abs/2302.11939) from [khairulislam](https://github.com/khairulislam).
-
-:triangular_flag_on_post: **News** (2024.10) We include several large time-series models, release pre-training code, and provide scripts.
-
-## What is LTM?
-
-LTM (**L**arge **T**ime-Series **M**odel) is a series of scalable deep models built on foundation backbones (e.g., Transformers) and large-scale pre-training, which will be applied to a variety of time series data and diverse downstream tasks. For more information, here we list some related slides: [[CN]](https://cloud.tsinghua.edu.cn/f/1f3fdcf3304c4a82bc13/), [[Eng]](https://cloud.tsinghua.edu.cn/f/8a585e37f45f46fd97d0/).
-
-<p align="center">
-<img src="./figures/abilities.png" alt="" align=center />
-</p>
-
-## Model Checklist
-
-- [x] **Timer-XL** - Timer-XL: Long-Context Transformer for Unified Time Series Forecasting. [[ICLR 2025]](https://arxiv.org/abs/2410.04803), [[Code]](https://github.com/thuml/Timer-XL)
-- [x] **Moirai** - Unified Training of Universal Time Series Forecasting Transformers. [[ICML 2024]](https://arxiv.org/abs/2402.02592), [[Code]](https://github.com/SalesforceAIResearch/uni2ts)
-- [x] **Timer** - Timer: Generative Pre-trained Transformers Are Large Time Series Models. [[ICML 2024]](https://arxiv.org/abs/2402.02368), [[Code]](https://github.com/thuml/Large-Time-Series-Model)
-- [x] **Moment** - MOMENT: A Family of Open Time-series Foundation Model. [[ICML 2024]](https://arxiv.org/abs/2402.03885), [[Code]](https://github.com/moment-timeseries-foundation-model/moment)
-- [x] **TTMs** - Tiny Time Mixers (TTMs): Fast Pre-trained Models for Enhanced Zero/Few-Shot Forecasting of Multivariate Time Series. [[Arxiv 2024]](https://arxiv.org/pdf/2401.03955), [[Code]](https://huggingface.co/ibm-research/ttm-research-r2)
-- [x] **GPT4TS** - One Fits All: Power General Time Series Analysis by Pretrained LM. [[NeurIPS 2023]](https://arxiv.org/abs/2302.11939), [[Code]](https://github.com/DAMO-DI-ML/NeurIPS2023-One-Fits-All)
-- [x] **Time-LLM**: . Time-LLM: Time Series Forecasting by Reprogramming Large Language Models. [[ICLR 2024]](https://arxiv.org/abs/2310.01728), [[Code]](https://github.com/KimMeen/Time-LLM)
-- [x] **AutoTimes**: Autoregressive Time Series Forecasters via Large Language Models. [[NeurIPS 2024]](https://arxiv.org/abs/2402.02370), [[Code]](https://github.com/thuml/AutoTimes)
-- [ ] Sundial: A Family of Highly Capable Time Series Foundation Models. [[ICML 2025]](https://arxiv.org/abs/2502.00816), [[Code]](https://github.com/thuml/Sundial)
-- [ ] LLMTime: Large Language Models Are Zero-Shot Time Series Forecasters. [[NeurIPS 2023]](https://arxiv.org/abs/2310.07820), [[Code]](https://github.com/ngruver/llmtime)
-- [ ] Chronos: Learning the Language of Time Series. [[TMLR 2024]](https://arxiv.org/abs/2403.07815), [[Code]](https://github.com/amazon-science/chronos-forecasting)
-- [ ] Time-MoE: Billion-Scale Time Series Foundation Models With Mixture Of Experts. [[ICLR 2025]](https://arxiv.org/abs/2409.16040), [[Code]](https://github.com/Time-MoE/Time-MoE)
-- [ ] A Decoder-Only Foundation Model for Time-Series Forecasting. [[ICML 2024]](https://arxiv.org/abs/2310.10688), [[Code]](https://github.com/google-research/timesfm)
-
-
-## Usage
-
-1. Install Python 3.11 For convenience, execute the following command.
+192.168.65.35机器上
 
 ```
-pip install -r requirements.txt
+(openltm) lqy@DGXUSER1:/raid/hsz$ conda list
+# packages in environment at /home/dgxuser1/miniconda3/envs/openltm:
+#
+# Name                    Version                   Build  Channel
+_libgcc_mutex             0.1                        main  
+_openmp_mutex             5.1                       1_gnu  
+anyio                     4.10.0                   pypi_0    pypi
+aom                       3.6.0                h6a678d5_0  
+argon2-cffi               25.1.0                   pypi_0    pypi
+argon2-cffi-bindings      25.1.0                   pypi_0    pypi
+arrow                     1.3.0                    pypi_0    pypi
+asttokens                 3.0.0                    pypi_0    pypi
+async-lru                 2.0.5                    pypi_0    pypi
+attrs                     25.3.0                   pypi_0    pypi
+babel                     2.17.0                   pypi_0    pypi
+beautifulsoup4            4.13.4                   pypi_0    pypi
+blas                      1.0                         mkl  
+bleach                    6.2.0                    pypi_0    pypi
+brotlipy                  0.7.0           py310h7f8727e_1002  
+bzip2                     1.0.8                h5eee18b_6  
+ca-certificates           2025.2.25            h06a4308_0  
+cairo                     1.16.0               he5ede1b_6  
+certifi                   2025.7.14       py310h06a4308_0  
+cffi                      1.17.1          py310h1fdaa30_1  
+chardet                   4.0.0           py310h06a4308_1003  
+charset-normalizer        3.4.2                    pypi_0    pypi
+click                     8.3.1                    pypi_0    pypi
+cmake                     3.25.0                   pypi_0    pypi
+comm                      0.2.2                    pypi_0    pypi
+conda-pack                0.8.1                    pypi_0    pypi
+contourpy                 1.3.2                    pypi_0    pypi
+cryptography              44.0.1          py310h7825ff9_0  
+cuda-cudart               12.1.105                      0    nvidia
+cuda-cupti                12.1.105                      0    nvidia
+cuda-libraries            12.1.0                        0    nvidia
+cuda-nvrtc                12.1.105                      0    nvidia
+cuda-nvtx                 12.1.105                      0    nvidia
+cuda-opencl               12.4.127                      0    nvidia
+cuda-runtime              12.1.0                        0    nvidia
+cudatoolkit               11.3.1               h2bc3f7f_2  
+cycler                    0.12.1                   pypi_0    pypi
+dav1d                     1.2.1                h5eee18b_0  
+debugpy                   1.8.14                   pypi_0    pypi
+decorator                 5.2.1                    pypi_0    pypi
+defusedxml                0.7.1                    pypi_0    pypi
+einops                    0.8.1                    pypi_0    pypi
+exceptiongroup            1.3.0                    pypi_0    pypi
+executing                 2.2.0                    pypi_0    pypi
+expat                     2.7.1                h6a678d5_0  
+fastjsonschema            2.21.1                   pypi_0    pypi
+ffmpeg                    4.3                  hf484d3e_0    pytorch
+filelock                  3.17.0          py310h06a4308_0  
+fontconfig                2.14.1               h55d465d_3  
+fonttools                 4.59.0                   pypi_0    pypi
+fqdn                      1.5.1                    pypi_0    pypi
+freetype                  2.13.3               h4a9f257_0  
+fribidi                   1.0.10               h7b6447c_0  
+fsspec                    2025.7.0                 pypi_0    pypi
+gmp                       6.3.0                h6a678d5_0  
+gmpy2                     2.2.1           py310h5eee18b_0  
+gnutls                    3.6.15               he1e5248_0  
+graphite2                 1.3.14               h295c915_1  
+h11                       0.16.0                   pypi_0    pypi
+harfbuzz                  10.2.0               hdfddeaa_1  
+hf-xet                    1.2.0                    pypi_0    pypi
+httpcore                  1.0.9                    pypi_0    pypi
+httpx                     0.28.1                   pypi_0    pypi
+huggingface-hub           0.34.3                   pypi_0    pypi
+icu                       73.1                 h6a678d5_0  
+idna                      2.10               pyhd3eb1b0_0  
+intel-openmp              2025.0.0          h06a4308_1171  
+ipykernel                 6.29.5                   pypi_0    pypi
+ipython                   8.37.0                   pypi_0    pypi
+ipywidgets                8.1.7                    pypi_0    pypi
+isoduration               20.11.0                  pypi_0    pypi
+jedi                      0.19.2          py310h06a4308_0  
+jinja2                    3.1.6           py310h06a4308_0  
+joblib                    1.5.1                    pypi_0    pypi
+jpeg                      9e                   h5eee18b_3  
+json5                     0.12.0                   pypi_0    pypi
+jsonpointer               3.0.0                    pypi_0    pypi
+jsonschema                4.25.0                   pypi_0    pypi
+jsonschema-specifications 2025.4.1                 pypi_0    pypi
+jupyter                   1.1.1                    pypi_0    pypi
+jupyter-client            8.6.3                    pypi_0    pypi
+jupyter-console           6.6.3                    pypi_0    pypi
+jupyter-core              5.8.1                    pypi_0    pypi
+jupyter-events            0.12.0                   pypi_0    pypi
+jupyter-lsp               2.2.6                    pypi_0    pypi
+jupyter-server            2.16.0                   pypi_0    pypi
+jupyter-server-terminals  0.5.3                    pypi_0    pypi
+jupyterlab                4.4.5                    pypi_0    pypi
+jupyterlab-pygments       0.3.0                    pypi_0    pypi
+jupyterlab-server         2.27.3                   pypi_0    pypi
+jupyterlab-widgets        3.0.15                   pypi_0    pypi
+kiwisolver                1.4.8                    pypi_0    pypi
+lame                      3.100                h7b6447c_0  
+lark                      1.2.2                    pypi_0    pypi
+lcms2                     2.16                 h92b89f2_1  
+ld_impl_linux-64          2.40                 h12ee557_0  
+lerc                      4.0.0                h6a678d5_0  
+libavif                   1.1.1                h5eee18b_0  
+libcublas                 12.1.0.26                     0    nvidia
+libcufft                  11.0.2.4                      0    nvidia
+libcufile                 1.9.1.3                       0    nvidia
+libcurand                 10.3.5.147                    0    nvidia
+libcusolver               11.4.4.55                     0    nvidia
+libcusparse               12.0.2.55                     0    nvidia
+libdeflate                1.22                 h5eee18b_0  
+libffi                    3.4.4                h6a678d5_1  
+libgcc-ng                 11.2.0               h1234567_1  
+libglib                   2.84.2               h37c7471_0  
+libgomp                   11.2.0               h1234567_1  
+libiconv                  1.16                 h5eee18b_3  
+libidn2                   2.3.4                h5eee18b_0  
+libjpeg-turbo             2.0.0                h9bf148f_0    pytorch
+libnpp                    12.0.2.50                     0    nvidia
+libnvjitlink              12.1.105                      0    nvidia
+libnvjpeg                 12.1.1.14                     0    nvidia
+libpng                    1.6.39               h5eee18b_0  
+libstdcxx-ng              11.2.0               h1234567_1  
+libtasn1                  4.19.0               h5eee18b_0  
+libtiff                   4.7.0                hde9077f_0  
+libunistring              0.9.10               h27cfd23_0  
+libuuid                   1.41.5               h5eee18b_0  
+libwebp-base              1.3.2                h5eee18b_1  
+libxcb                    1.17.0               h9b100fa_0  
+libxml2                   2.13.8               hfdd30dd_0  
+lit                       15.0.7                   pypi_0    pypi
+llvm-openmp               14.0.6               h9e868ea_0  
+lz4-c                     1.9.4                h6a678d5_1  
+markupsafe                3.0.2           py310h5eee18b_0  
+matplotlib                3.10.5                   pypi_0    pypi
+matplotlib-inline         0.1.7                    pypi_0    pypi
+mistune                   3.1.3                    pypi_0    pypi
+mkl                       2025.0.0           hacee8c2_941  
+modelscope                1.32.0                   pypi_0    pypi
+mpc                       1.3.1                h5eee18b_0  
+mpfr                      4.2.1                h5eee18b_0  
+mpmath                    1.3.0           py310h06a4308_0  
+nbclient                  0.10.2                   pypi_0    pypi
+nbconvert                 7.16.6                   pypi_0    pypi
+nbformat                  5.10.4                   pypi_0    pypi
+ncurses                   6.4                  h6a678d5_0  
+nest-asyncio              1.6.0                    pypi_0    pypi
+nettle                    3.7.3                hbbd107a_1  
+networkx                  3.4.2           py310h06a4308_0  
+notebook                  7.4.5                    pypi_0    pypi
+notebook-shim             0.2.4                    pypi_0    pypi
+numpy                     1.26.4                   pypi_0    pypi
+openh264                  2.1.1                h4ff587b_0  
+openjpeg                  2.5.2                h0d4d230_1  
+openssl                   3.0.17               h5eee18b_0  
+overrides                 7.7.0                    pypi_0    pypi
+packaging                 25.0                     pypi_0    pypi
+pandas                    2.3.1                    pypi_0    pypi
+pandocfilters             1.5.1                    pypi_0    pypi
+parso                     0.8.4                    pypi_0    pypi
+pcre2                     10.42                hebb0a14_1  
+pexpect                   4.9.0                    pypi_0    pypi
+pillow                    11.3.0          py310hb1c3d2d_0  
+pip                       25.1               pyhc872135_2  
+pixman                    0.40.0               h7f8727e_1  
+platformdirs              4.3.8                    pypi_0    pypi
+prometheus-client         0.22.1                   pypi_0    pypi
+prompt-toolkit            3.0.51                   pypi_0    pypi
+psutil                    7.0.0                    pypi_0    pypi
+pthread-stubs             0.3                  h0ce48e5_1  
+ptyprocess                0.7.0                    pypi_0    pypi
+pure-eval                 0.2.3                    pypi_0    pypi
+pycparser                 2.21               pyhd3eb1b0_0  
+pygments                  2.19.2                   pypi_0    pypi
+pyopenssl                 25.0.0          py310h06a4308_0  
+pyparsing                 3.2.3                    pypi_0    pypi
+pysocks                   1.7.1           py310h06a4308_0  
+python                    3.10.18              h1a3bd86_0  
+python-dateutil           2.9.0.post0              pypi_0    pypi
+python-json-logger        3.3.0                    pypi_0    pypi
+pytorch-cuda              12.1                 ha16c6d3_6    pytorch
+pytorch-mutex             1.0                        cuda    pytorch
+pytz                      2025.2                   pypi_0    pypi
+pyyaml                    6.0.2           py310h5eee18b_0  
+pyzmq                     27.0.0                   pypi_0    pypi
+readline                  8.2                  h5eee18b_0  
+referencing               0.36.2                   pypi_0    pypi
+regex                     2025.7.34                pypi_0    pypi
+requests                  2.32.4                   pypi_0    pypi
+rfc3339-validator         0.1.4                    pypi_0    pypi
+rfc3986-validator         0.1.1                    pypi_0    pypi
+rfc3987-syntax            1.1.0                    pypi_0    pypi
+rpds-py                   0.26.0                   pypi_0    pypi
+safetensors               0.5.3                    pypi_0    pypi
+scikit-learn              1.7.1                    pypi_0    pypi
+scipy                     1.15.3                   pypi_0    pypi
+send2trash                1.8.3                    pypi_0    pypi
+setuptools                78.1.1          py310h06a4308_0  
+shellingham               1.5.4                    pypi_0    pypi
+six                       1.17.0                   pypi_0    pypi
+sniffio                   1.3.1                    pypi_0    pypi
+soupsieve                 2.7                      pypi_0    pypi
+sqlite                    3.45.3               h5eee18b_0  
+stack-data                0.6.3                    pypi_0    pypi
+sympy                     1.13.3          py310h06a4308_1  
+tbb                       2022.0.0             hdb19cb5_0  
+tbb-devel                 2022.0.0             hdb19cb5_0  
+terminado                 0.18.1                   pypi_0    pypi
+threadpoolctl             3.6.0                    pypi_0    pypi
+tinycss2                  1.4.0                    pypi_0    pypi
+tk                        8.6.14               h993c535_1  
+tokenizers                0.21.4                   pypi_0    pypi
+tomli                     2.2.1                    pypi_0    pypi
+torch                     2.1.2+cu121              pypi_0    pypi
+torchaudio                2.1.2+cu121              pypi_0    pypi
+torchvision               0.16.2+cu121             pypi_0    pypi
+tornado                   6.5.1                    pypi_0    pypi
+tqdm                      4.67.1                   pypi_0    pypi
+traitlets                 5.14.3                   pypi_0    pypi
+transformers              4.55.0                   pypi_0    pypi
+triton                    2.1.0                    pypi_0    pypi
+typer-slim                0.20.0                   pypi_0    pypi
+types-python-dateutil     2.9.0.20250708           pypi_0    pypi
+typing-extensions         4.14.1                   pypi_0    pypi
+typing_extensions         4.12.2          py310h06a4308_0  
+tzdata                    2025.2                   pypi_0    pypi
+uri-template              1.3.0                    pypi_0    pypi
+urllib3                   1.26.4             pyhd3eb1b0_0  
+wcwidth                   0.2.13                   pypi_0    pypi
+webcolors                 24.11.1                  pypi_0    pypi
+webencodings              0.5.1                    pypi_0    pypi
+websocket-client          1.8.0                    pypi_0    pypi
+wheel                     0.45.1          py310h06a4308_0  
+widgetsnbextension        4.0.14                   pypi_0    pypi
+xorg-libx11               1.8.12               h9b100fa_1  
+xorg-libxau               1.0.12               h9b100fa_0  
+xorg-libxdmcp             1.1.5                h9b100fa_0  
+xorg-libxext              1.3.6                h9b100fa_0  
+xorg-libxrender           0.9.12               h9b100fa_0  
+xorg-xorgproto            2024.1               h5eee18b_1  
+xz                        5.6.4                h5eee18b_1  
+yaml                      0.2.5                h7b6447c_0  
+zlib                      1.2.13               h5eee18b_1  
+zstd                      1.5.6                hc292b87_0  
 ```
 
-2. Place downloaded data in the folder ```./dataset```. Here is a [dataset summary](./figures/datasets.png).
 
-- For univariate pre-training (skip this step if you use a pre-trained checkpoint):
-  * [UTSD](https://huggingface.co/datasets/thuml/UTSD) contains 1 billion time points for large-scale pre-training (in numpy format): [[Download]](https://cloud.tsinghua.edu.cn/f/93868e3a9fb144fe9719/
-).
-  * [ERA5-Family](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5) (40-year span, thousands of variables) for domain-specific model: [[Download]](https://cloud.tsinghua.edu.cn/f/7fe0b95032c64d39bc4a/).
 
-- For supervised training or modeling adaptation
-  * Datasets from [TSLib](https://github.com/thuml/Time-Series-Library) : [[Download]](https://cloud.tsinghua.edu.cn/f/4d83223ad71047e28aec/).
+## 整体结构
 
-3. Training from scratch or using our pre-trained checkpoint in the folder ```./checkpoints```
+- 入口： [run.py](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 统一解析参数、设随机种子、选择任务分支（forecast / forecast_test_all / forecast_test_all2 / forecast_test_all3），并将 vote_rate 从百分比换算为比例。
+- 训练与基础推理： exp/exp_forecast.py 负责模型构建、优化器/损失选择、训练循环、验证与测试推理，支持 DDP/DP。
 
-- We provide the [checkpoint](https://arxiv.org/abs/2410.04803) pre-trained on 260B time points [[Download]](https://cloud.tsinghua.edu.cn/f/01c35ca13f474176be7b/).
+- 数据加载： data_provider/data_factory.py 负责数据集选择与别名映射；为 BJTU 异常数据集提供专门分支，透传 test_data_path、scaler 等自定义参数。
+- 数据集实现： data_provider/data_loader.py 中的 BJTUAnomalyloader（其余数据类保持原有逻辑）。
+- 异常检测方案：
+  - 校准+批量检测： exp/exp_AnomalyDetection.py（Exp_Forecast_TestAll2）
+  - 一次性快速寻优： exp/TestInOnce.py（Exp_Forecast_TestAll3）
 
-4. We provide some supervised training, pre-training, and adaptation scripts under the folder `./scripts/`:
+##data_factory（工厂模式）引入了BJTU
 
-```
-# Supervised training
-# (a) one-for-one forecasting
-bash ./scripts/supervised/forecast/moirai_ecl.sh
-# (b) one-for-all (rolling) forecasting
-bash ./scripts/supervised/rolling_forecast/timer_xl_ecl.sh
+#### A. 路由解析 (Alias Resolution)
 
-# Large-scale pre-training
-# (a) pre-training on UTSD
-bash ./scripts/pretrain/timer_xl_utsd.sh
-# (b) pre-training on ERA5
-bash ./scripts/pretrain/timer_xl_era5.sh
+- **机制**: 利用 `DATA_ALIASES` 字典建立映射层。
+- **目的**: 将分散的物理数据集名（如 `ETTh1`, `Traffic`）归一化为统一的逻辑处理类（`MultivariateDatasetBenchmark`），减少冗余代码。
+- **异常处理**: 显式检查 `data_key` 是否存在，若未注册则抛出包含所有可选值的 `ValueError`，便于调试。
 
-# Model adaptation
-# (a) full-shot fine-tune
-bash ./scripts/adaptation/full_shot/timer_xl_etth1.sh
-# (b) few-shot fine-tune
-bash ./scripts/adaptation/few_shot/timer_xl_etth1.sh
-```
+#### B. 上下文配置 (Context Configuration)
 
-5. Develop your large time-series model.
+- **Shuffle 策略**:
+  - Train 阶段: `True`
+  - Val/Test 阶段: `False`
 
-- Add the model file to the folder `./models`. You can follow the `./models/timer_xl.py`.
-- Include the newly added model in the `Exp_Basic.model_dict` of  `./exp/exp_basic.py`.
-- Create the corresponding scripts under the folder `./scripts`.
+#### C. 分支实例化 (Branching Instantiation)
 
-## Recommended Resources
+- **分支 1: 定制化业务 (Target: BJTU)**
+  - **触发条件**: `data_key == 'BJTU'`
+  - **参数清洗**: 使用 `kwargs.pop('test_data_path')`。
+    - *原理*: 从 `kwargs` 中**取出并删除**该键值对。
+    - *作用*: 防止后续将 `**kwargs` 传给 `BJTUAnomalyloader` 构造函数时，出现 "multiple values for keyword argument" 错误（即避免显式传参和 kwargs 隐式传参冲突）。
+  - **接口适配**: 将 Transformer 视角的 `input_token_len` 映射为 Dataset 视角的 `patch_len`。
+- **分支 2: 标准化基准 (Target: Benchmark/Standard)**
+  - **触发条件**: 其他所有数据集。
+  - **特征工程**: 计算 `timeenc`（是否使用 TimeFeatures 嵌入）。
+  - **参数传递**: 传递标准的 `size` 列表 `[seq, label, pred]` 和 `features` 类型 (M/S/MS)。
 
-Here we list some resources of LTMs, which support out-of-box usage (e.g., zero-shot forecasting):
+#### D.例子
 
-- Sundial: https://huggingface.co/thuml/sundial-base-128m
-- Timer: https://huggingface.co/thuml/timer-base-84m
-- Chronos: https://huggingface.co/amazon/chronos-t5-base
-- Moirai: https://huggingface.co/Salesforce/moirai-1.0-R-base
-- TimesFM: https://huggingface.co/google/timesfm-1.0-200m
-- Time-MoE: https://huggingface.co/Maple728/TimeMoE-50M
-- TTMs: https://huggingface.co/ibm-research/ttm-research-r2
+用户在命令行启动测试脚本。 `python run.py --task_name anomaly_detection --data BJTU --batch_size 32 --seq_len 96`
 
-> [!NOTE]
-> LTMs are still small compared to foundation models of other modalities. For example, it is okay to use CPUs for inference, RTX 4090s for adaptation, A100s for pre-training.
+exp中调用train_loader = data_provider(args, flag='train')
 
-## Citation
+**Step 1: 查表** Factory 收到请求，查看 `args.data="BJTU"`。它识别出这是定制分支，不是通用 Benchmark。
 
-If you find this repo helpful, please cite our paper. 
+**Step 2: 构造 Dataset (实例化)** Factory 开始组装参数字典 `kwargs`。
 
-```
-@inproceedings{liutimer,
-  title={Timer: Generative Pre-trained Transformers Are Large Time Series Models},
-  author={Liu, Yong and Zhang, Haoran and Li, Chenyu and Huang, Xiangdong and Wang, Jianmin and Long, Mingsheng},
-  booktitle={Forty-first International Conference on Machine Learning}
-}
+- 它发现 BJTU 数据集需要一个特殊的参数 `patch_len`，但 `args` 里只有 `seq_len` 和 `input_token_len`。
+- **关键动作**: 代码执行 `patch_len = args.input_token_len`，完成了参数适配。
+- 它调用: `dataset = BJTUAnomalyloader(root_path='...', mode='train', patch_len=..., ...)`
+- 此时，`BJTUAnomalyloader` 在内存中完成了文件的读取。
 
-@article{liu2024timer,
-  title={Timer-XL: Long-Context Transformers for Unified Time Series Forecasting},
-  author={Liu, Yong and Qin, Guo and Huang, Xiangdong and Wang, Jianmin and Long, Mingsheng},
-  journal={arXiv preprint arXiv:2410.04803},
-  year={2024}
-}
+**Step 3: 构造 DataLoader (封装)** Factory 检查 `args.task_name`。
 
-@article{liu2025sundial,
-  title={Sundial: A Family of Highly Capable Time Series Foundation Models},
-  author={Liu, Yong and Qin, Guo and Shi, Zhiyuan and Chen, Zhi and Yang, Caiyin and Huang, Xiangdong and Wang, Jianmin and Long, Mingsheng},
-  journal={arXiv preprint arXiv:2502.00816},
-  year={2025}
-}
-```
+- 发现是 `anomaly_detection`。
+- **关键决策**: 设置 `drop_last = False`。这意味着如果最后的数据不够一个 Batch (32个)，通过补齐或保留原样输出，绝不丢弃
+- 它调用: `loader = DataLoader(dataset, batch_size=32, shuffle=True, ...)`
 
-## Acknowledgment
+## data_provider/data_loader.py 中 BJTUAnomalyloader 的主要实现：
 
-We appreciate the following GitHub repos a lot for their valuable code and efforts:
-- Time-Series-Library (https://github.com/thuml/Time-Series-Library)
-- Large-Time-Series-Model (https://github.com/thuml/Large-Time-Series-Model)
-- AutoTimes (https://github.com/thuml/AutoTimes)
+在 `data_provider` 体系中，不同的 Dataset 类实际上充当了 **适配器（Adapter）** 的角色。
 
-## Contributors
 
-If you have any questions or want to use the code, feel free to contact:
-* Yong Liu (liuyong21@mails.tsinghua.edu.cn)
-* Guo Qin (qinguo24@mails.tsinghua.edu.cn)
-* Haixuan Liu (liuhaixu21@mails.tsinghua.edu.cn)
+
+上层的 `DataLoader` 和模型（Model）期望的数据格式是**标准化的**：
+
+- **输入**: Index (索引)
+- **输出**: Tensor `[Seq_Len, Channel]`
+
+但底层物理数据的存储方式是**千奇百怪的**：
+
+- **Standard Dataset**: 单个 CSV 文件，包含时间戳列，需要 `TimeFeature` 编码。
+- **BJTU Dataset (本例)**: 可能是文件夹而非文件，CSV **没有表头 (Headerless)**，甚至包含脏数据（非数字字符），且训练/验证集是在单一文件中硬切分的（80/20切分）。
+- 如果强行用 `MultivariateDatasetBenchmark` 加载 BJTU 数据，会导致：
+  1. **解析错误**: 通用类默认第一行是表头，会把 BJTU 的第一行数据吃掉。
+  2. **逻辑污染**: 为了兼容 BJTU 的“文件夹拼接逻辑”和“80/20 内存切分”，必须在通用类里写大量的 `if dataset == 'BJTU': ...`，这违反了 **开闭原则 (Open/Closed Principle)**。
+
+
+
+
+
+- 目的：面向 BJTU 异常检测数据，支持训练/验证从 train 目录切分，测试按指定 CSV 单文件滑窗；统一使用 StandardScaler，可外部注入 scaler 复用训练归一化。
+- 路径与分割：
+  - train/val：若 root_path 已含 train 则直接用；否则优先 root_path/train（存在则用），再回退原 root_path。train 取前 80%，val 取后 20%。
+  - test：支持传入 test_data_path（或 kwargs['data_path']）；若路径不存在则尝试 root_path 拼接；最终要求找到单个 CSV。
+- stride（步长）：train/val 用 stride=1；test 用 seq_len - 2*patch_len，若小于 1 则夹到 1，用于非重叠/少重叠滑窗检测。
+- 读取：CSV 强制数值化，丢弃无法转数字的行；数据堆叠后返回 N×D。
+
+
+
+
+
+## 例子：运行一个寻优的脚本
+
+1. 定位检查点
+   - 在 checkpoints/ 下按时间找最新的目录，形如 checkpoints/forecast_永济工况1_转速1370转每秒_微调_autotimes_*，取其 basename 作为 --test_dir，模型文件用 checkpoint.pth。
+2. 入口命令
+   - python -u run.py --task_name forecast_test_all3 --is_training 0，模型 autotimes，数据集 BJTU，根目录 root_path 指向工况1测试集目录。n_vars=3，seq_len=2880，input_token_len=96，output_token_len=96，test_pred_len=96，batch_size=512，GPU 选择 0。未显式传 percentile/vote_rate，内部网格搜索自动处理。
+3. run.py 解析参数
+   - 将 vote_rate 由百分数转为比例（这里没传，后续在 TestAll3 内部自定列表），设置随机种子和 CUDA 设备，按 task_name=forecast_test_all3 选择 Exp_Forecast_TestAll3，并传入 args。
+4. data_factory 路由
+   - args.data="BJTU" 命中 data_dict 的 BJTUAnomalyloader 分支。test 阶段 shuffle=False，drop_last=False。test_data_path 为空，BJTU loader 会用 root_path 下的文件。
+5. BJTUAnomalyloader 读取数据
+   - flag="test"：stride = seq_len - 2*patch_len = 2880 - 2*96 = 2688，最小夹到 1（这里 2688）。
+   - test_data_path 为空时，尝试用 root_path（已指向 test 目录）下的 CSV；如路径不存在会再拼接 root_path。要求最终找到单个 CSV。
+   - 读 CSV：pd.read_csv(header=None) → to_numeric → dropna，仅保留数值。
+   - 归一化：若上层传入 scaler 则复用；否则自行 fit_transform(StandardScaler)。
+   - **len** = (len(data) - seq_len) // stride + 1；**getitem** 返回 (seq_x, seq_y, seq_x_mark, seq_y_mark)，seq_x/seq_y 同一个 2880 长度窗口、3 维；mark 为占位零张量。
+6. Exp_Forecast_TestAll3 流程（一次性寻优）
+   - 加载 checkpoint（strict=False），MSELoss(reduction='none')。
+   - 先跑一遍 root_path/test 下所有 CSV，逐文件收集窗口级 MSE（使用上面的 dataloader，步长 2688）。文件名含 “正常/normal/m0_g0_la0_ra0” 的样本加入 calibration_losses，其他记录在 test_data_map。
+   - 用 calibration_losses 构建基准分布 val_flattened，打印各文件平均 MSE，基准均值通常 ~0.02。若无正常文件则报错退出。
+   - 网格搜索 percentile 列表 + vote_rate 列表，约束：基准池 FPR ≤ 10%；按 gap=检测率-误报率 排序，展示 Top-8，并将最佳结果存 test_results/<setting>/best_results.npy。
+   - 输出日志与榜单写入 all_tuning_logs/GridSearch_<model_id>_<model_name>.log。
+
+
+
+## exp实验类型的扩展，exp2是进行测试，exp3是网格化搜索的快速测试和参数寻优
+
+#### exp/exp_forecast.py（基础训练与预测）
+
+- 输入（核心参数）：
+  - 数据：--data（如 ETTh1/BJTU）、--root_path、--data_path
+  - 时序：--seq_len、--input_token_len、--output_token_len、--test_pred_len
+  - 训练：--batch_size、--train_epochs、--learning_rate、--cosine/--lradj、--patience
+  - 模型：--model、--d_model、--n_heads、--e_layers、--d_ff 等
+  - 并行：--ddp/--dp、--gpu
+- 训练输出：
+  - checkpoints/<setting>/checkpoint.pth
+  - 日志打印；early stopping 触发后加载最佳模型
+- 测试输出：
+  - test_results/<setting>/ 下可视化（若 visualize）
+  - result_long_term_forecast.txt 中写入 mse/mae
+- 数据流：
+  1. _get_data → data_provider → data_factory 选择数据集（BJTU 走 BJTUAnomalyloader）。
+  2. 训练：MSELoss + Adam，支持 CosineAnnealingLR；每 epoch 验证/测试。
+  3. 测试：自回归多步推理，拼接 output_token_len 片段直到 test_pred_len，计算指标。
+
+75 x 19
+
+以下为三份代码的输入/输出与用法概览。
+
+------
+
+## exp/exp_forecast.py（基础训练与预测）
+
+- 输入（核心参数）：
+  - 数据：--data（如 ETTh1/BJTU）、--root_path、--data_path
+  - 时序：--seq_len、--input_token_len、--output_token_len、--test_pred_len
+  - 训练：--batch_size、--train_epochs、--learning_rate、--cosine/--lradj、--patience
+  - 模型：--model、--d_model、--n_heads、--e_layers、--d_ff 等
+  - 并行：--ddp/--dp、--gpu
+- 训练输出：
+  - checkpoints/<setting>/checkpoint.pth
+  - 日志打印；early stopping 触发后加载最佳模型
+- 测试输出：
+  - test_results/<setting>/ 下可视化（若 visualize）
+  - result_long_term_forecast.txt 中写入 mse/mae
+- 数据流：
+  1. _get_data → data_provider → data_factory 选择数据集（BJTU 走 BJTUAnomalyloader）。
+  2. 训练：MSELoss + Adam，支持 CosineAnnealingLR；每 epoch 验证/测试。
+  3. 测试：自回归多步推理，拼接 output_token_len 片段直到 test_pred_len，计算指标。
+
+示例（ETTh1 训练 + 测试）：
+
+------
+
+#### exp/exp_AnomalyDetection.py（TestAll2：校准+批量异常检测）
+
+- 输入（核心参数）：
+  - --task_name forecast_test_all2 --is_training 0
+  - --percentile（默认 99.9），--vote_rate（命令行传百分数，内部 /100）
+  - 数据：--data BJTU、--root_path（若传 root_path/test 会自动上移一层）、--seq_len、--input_token_len、--output_token_len
+  - 模型：--test_dir、--test_file_name
+- 输出：
+  - test_results/<setting>/result_summary.txt（每 CSV 的异常率）
+  - 每文件 *_flags.npy（样本级 0/1）
+- 流程：
+  1. 读取/加载 checkpoint，设 eval。
+  2. 校准：val_loader（降采样 10% 批次）计算点级 MSE 分布，阈值=percentile。
+  3. 测试：遍历 root_path/test 下 CSV，滑窗推理，点级 MSE 超阈计票；若异常点比例 > vote_rate，则样本记为异常，统计异常率。
+
+#### exp/TestInOnce.py（TestAll3：一次推理内自动寻优）
+
+- 输入（核心参数）：
+  - --task_name forecast_test_all3 --is_training 0
+  - 数据：--data BJTU、--root_path（可直接指向 test/ 或其上层）、--seq_len、--input_token_len、--output_token_len、--n_vars
+  - 模型：--test_dir、--test_file_name
+- 输出：
+  - test_results/<setting>/best_results.npy（Rank1 组合各文件异常率）
+  - 终端打印 Top-8 (P,V) 组合榜单
+- 流程：
+  1. 加载 checkpoint，MSELoss(reduction='none')。
+  2. 用 _get_data(flag='val') 仅获取 scaler，保证与训练归一化一致。
+  3. 遍历 root_path/test 下 CSV，滑窗推理，收集每窗口点级均值 MSE。文件名含“正常/normal/m0_g0_la0_ra0”者进入 calibration pool，其余进入 test_data_map。
+  4. 用 calibration pool 计算阈值分布；若无正常文件则报错退出。
+  5. 网格搜索 p_list × v_list，约束基准误报 ≤10%、正常平均误报 ≤10%，按 gap(检出-误报) 排序，展示 Top-8；保存 Rank1 结果。
+
+## **autotimes.py（模型层）**
+
+- 输入：[x_enc](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 形状 [B, L, M]，[x_mark_enc/x_mark_dec](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 未使用（占位）。
+- 逻辑：
+  1. 禁用 transformers 的安全加载检查（覆盖 check_torch_load_is_safe）。
+  2. [_get_inner_model](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 从本地 [local_path](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 读取 Llama/OPT/GPT2（默认 OPT-125m），fallback 到在线 ID。自动对齐 hidden_dim。
+  3. 冻结 LLM 参数，仅训练 tokenizer/decoder（Linear 或 MLP）。
+  4. 前向：按变量展开 → patch 切分（size=input_token_len，step 同步）→ encoder → LLM（输出 hidden_states[-1]）→ decoder → 还原形状 [B, L', M]，可选去标准化。
+- 输出：预测序列，形状与输入时间维匹配（token_len 及解码长度决定）。
+
+## **run.py（入口脚本）**
+
+- 主要参数：
+  - 任务：[--task_name](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)（forecast / forecast_test_all / forecast_test_all2 / forecast_test_all3），[--is_training](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 1/0
+  - 数据：[--data](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，`--root_path`，`--data_path`，[--seq_len](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--input_token_len](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--output_token_len](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，`--test_pred_len`
+  - 模型：[--model](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)（如 autotimes/timer_xl），[--n_vars](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--d_model](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--d_ff](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--e_layers](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--n_heads](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--llm_model](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)（LLAMA/OPT/GPT2），[--local_path](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)
+  - 优化：[--batch_size](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，`--train_epochs`，[--learning_rate](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--cosine](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，`--tmax`，[--weight_decay](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)
+  - 并行：[--gpu](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--dp](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，[--ddp](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)
+  - 异常检测：`--percentile`，[--vote_rate](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)（传入百分数，程序内除以 100）
+  - 测试加载：`--test_dir`，`--test_file_name`
+- 输出：
+  - 训练：`checkpoints/<setting>/checkpoint.pth`
+  - 预测：`result_long_term_forecast.txt`、可视化图（可选）
+  - 异常检测：[test_results//](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 下的 summary / best_results.npy / flags.npy
+- 任务分派：forecast → Exp_Forecast；forecast_test_all2 → Exp_Forecast_TestAll2；forecast_test_all3 → Exp_Forecast_TestAll3。
+
+- vote_rate 命令行为百分数，内部自动 /100。
+- 例如的输入vote_rate=1，内部会变成1%
+- BJTU 测试滑窗步长=seq_len-2*input_token_len，至少 1。
+- AutoTimes 需本地 LLM 权重目录（llm_model=OPT/GPT2/LLAMA 对应子目录），已禁用 transformers 加载安全检查。
+
+
+
+## 训练和测试的脚本用例
+
+#### 训练-工况1.sh（autotimes，OPT，BJTU，工况1）/raid/hsz/HSZ_OpenLTM/autotimes测试opt/永济电机轴承数据/训练-工况1.sh
+
+- 任务/模型：`task_name=forecast`，模型 `autotimes`，LLM 选 `OPT`。
+- 数据：`data=BJTU`，`root_path=/raid/hsz/OpenLTM_data_backup/datasets/永济电机轴承数据集/工况1.../train/`，自动取首个 CSV 为 `data_path`。
+- 序列配置：`token_num=30`，`token_len=96` ⇒ `seq_len=2880`；`input_token_len=96`，`output_token_len=96`，`n_vars=3`。
+- 模型超参：`d_model=1024`，`d_ff=2048`，`e_layers=8`，`n_heads=8`，`use_norm` 开启。
+- 训练超参：`batch_size=256`，`train_epochs=5`，`learning_rate=1e-4`，GPU 0。
+- 预训练权重路径在脚本里声明了 `pretrain_model_path`，但未传给 run.py，也未启用 `--adaptation`，因此当前写法是从头训练/微调，不会加载该权重。
+- 运行行为：调用 `python run.py --task_name forecast --is_training 1 ...`，走 Exp_Forecast，输出到 `checkpoints/forecast_<setting>/checkpoint.pth`。
+
+输出：模型 checkpoint（`checkpoints/.../checkpoint.pth`），训练日志；预测指标写入 `result_long_term_forecast.txt`（测试阶段才会生成）。
+
+------
+
+#### 测试-工况1.sh（异常检测 TestAll2，OPT，BJTU，工况1）/raid/hsz/HSZ_OpenLTM/autotimes测试opt/永济电机轴承数据/测试-工况1.sh
+
+- 任务/模型：`task_name=forecast_test_all2`，模型 `autotimes`，LLM 选 `OPT`。
+- 数据：`root_path=/raid/hsz/OpenLTM_data_backup/datasets/永济电机轴承数据集/工况1.../test/`，`data=BJTU`；测试阶段 BJTUAnomalyloader 会遍历该目录的 CSV。
+- 序列配置需与训练一致：`seq_len=2880`，`input_token_len=96`，`output_token_len=96`，`test_pred_len=96`，`n_vars=3`；模型超参同训练（d_model/d_ff/e_layers/n_heads）。
+- 异常检测参数：
+  - 脚本中 `PARAMS` 定义多组 `(percentile, vote_rate)`，如 99.9/1.0、99.5/1.0 等。
+  - **注意**：run.py 会把传入的 vote_rate 当作“百分数”再除以 100；要表示 1% 应传 `1.0`，不要传 `0.01`，否则变成 0.0001。
+- 检查点查找：`CKPT_DIR=$(ls -1dt checkpoints/forecast_${model_id}_${model_name}_* | head -n1)`，取最新目录 basename 作为 `--test_dir`，文件名 `checkpoint.pth`。
+- 运行行为：对 PARAMS 中的每组 (p,v) 调用一次 `python run.py --task_name forecast_test_all2 ...`。流程：
+  1. 用验证集（降采样 10% 批次）计算点级 MSE 分布，取 percentile 得到阈值。
+  2. 遍历 test 目录 CSV，滑窗推理，点级 MSE 超阈计票；若异常点比例 > vote_rate 判该窗口/样本为异常，统计异常率。
+  3. 结果写入 `test_results/<setting>/result_summary.txt` 和各文件的 `*_flags.npy`；日志追加到 `all_tuning_logs/_${model_id}_${model_name}_all_experiments.log`。
+
+输出：每组参数的结果在 `test_results/<setting>/result_summary.txt`，并生成样本级标记 NPY；日志在 `all_tuning_logs/`。
+
+### 自动寻优-工况1.sh（autotimes + TestAll3，路径 `/autotimes测试opt/...`）
+
+- 任务：`forecast_test_all3`（一次推理内自动寻优），模型 `autotimes`，LLM `OPT`，数据 `BJTU`，3 维。
+- 参数：`seq_len=2880`，`input_token_len=96`，`output_token_len=96`，`test_pred_len=96`，`d_model=1024`，`d_ff=2048`，`e_layers=8`，`n_heads=8`，`batch_size=512`，GPU 0。
+- 检查点：取最新 `checkpoints/forecast_${model_id}_${model_name}_*` 的 basename 作为 `--test_dir`，加载 `checkpoint.pth`。
+- 流程：不需要手动传 percentile/vote_rate，脚本去掉循环，TestAll3 内部自动：
+  1. 用 val loader 仅获取 scaler；
+  2. 遍历 test 目录 CSV，滑窗推理，收集 MSE；
+  3. 自动识别文件名含 “正常/normal/m0_g0_la0_ra0” 的样本为基准池，计算阈值分布；
+  4. 内置网格搜索 (P,V)，筛掉正常误报 >10% 的组合，按 gap 排序输出 Top-8，保存 Rank1 结果到 `test_results/<setting>/best_results.npy`；
+  5. 日志写 `all_tuning_logs/GridSearch_${model_id}_${model_name}.log`。
+
+### 训练-工况1.sh（timer_xl 版本，路径 `/zhaojiash/timer_xl/...`）
+
+- 任务：`forecast`，模型 `timer_xl`，数据 `BJTU`，3 维。
+- 序列与模型：`seq_len=30*96=2880`，`input_token_len=96`，`output_token_len=96`，`n_vars=3`，`d_model=1024`，`d_ff=2048`，`e_layers=8`，`n_heads=8`，`use_norm` 开启。
+- 训练：`batch_size=256`，`train_epochs=10`，`learning_rate=5e-6`，GPU 0。
+- 预训练：开启 `--adaptation`，加载 `pretrain_model_path=/home/ubuntu/zhaojia/checkpoints/Timer_xl/checkpoint.pth`。
+- 数据：`root_path` 指向工况1训练目录，自动取首个 CSV 作为 data_path。
+- 输出：`checkpoints/forecast_<setting>/checkpoint.pth`，日志打印，训练后 result_long_term_forecast.txt（测试阶段写）。
+
+### 测试-工况1.sh（timer_xl + TestAll2，路径 `/zhaojiash/timer_xl/...`）
+
+- 任务：`forecast_test_all2`（校准+批量异常检测），模型 `timer_xl`，数据 `BJTU`，3 维。
+- 参数保持与训练一致：`seq_len=2880`，`input_token_len=96`，`output_token_len=96`，`test_pred_len=96`，`d_model/d_ff/e_layers/n_heads` 同步。
+- 检测参数：循环多组 `(percentile, vote_rate)`。**注意** run.py 会把 vote_rate 当“百分数”再除以 100，要表示 1% 应传 `1.0`，脚本里用 `0.01` 会变成 0.0001，需自行修正。
+- 流程：寻找最新 `checkpoints/forecast_${model_id}_${model_name}_*` 目录 → 加载 `checkpoint.pth` → 用验证集降采样校准阈值 → 遍历 test 目录 CSV 滑窗推理，统计异常率 → 结果写 `test_results/<setting>/result_summary.txt` 与各文件 `*_flags.npy`，日志汇总到 `all_tuning_logs/_...log`。
