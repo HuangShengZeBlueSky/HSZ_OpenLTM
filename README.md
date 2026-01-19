@@ -1,3 +1,220 @@
+# HSZ_OpenLTM
+
+基于 OpenLTM 的时序大模型预测与异常检测实现，包含 Timer-XL 系列与 AutoTimes 等模型，支持训练、批量异常检测与一次性参数寻优。
+
+An OpenLTM-based time-series foundation model implementation for forecasting and anomaly detection, covering Timer-XL and AutoTimes variants with training, batch anomaly detection, and one-pass parameter search.
+
+## 适用任务与模型 | Tasks & Models
+
+### 任务模式 | Task modes
+- forecast：训练与常规测试
+- forecast_test_all：遍历目录下全部测试 CSV
+- forecast_test_all2：校准后批量异常检测
+- forecast_test_all3：一次性参数寻优并输出 Top 结果
+
+### 支持模型 | Supported models
+- autotimes
+- gpt4ts
+- moirai
+- moment
+- time_llm
+- timer
+- timer_xl
+- ttm
+
+### 数据集分类（标准基准 vs BJTU 专用）| Datasets (Benchmark vs BJTU)
+- 标准基准别名映射（多变量基准类）：ETTh1、ETTh2、ETTm1、ETTm2、ECL、Electricity、Weather、Traffic
+- 标准基准注册名：UnivariateDatasetBenchmark、MultivariateDatasetBenchmark、Global_Temp、Global_Wind、Era5_Pretrain、Era5_Pretrain_Test、Utsd、Utsd_Npy
+- BJTU 专用：BJTU（异常检测专用加载逻辑）
+
+来源： [data_provider/data_factory.py](data_provider/data_factory.py) 与 [data_provider/data_loader.py](data_provider/data_loader.py)
+
+## 安装与环境 | Installation
+
+建议使用 Python 3.10+。依赖见 [requirements.txt](requirements.txt)。
+
+    pip install -r requirements.txt
+
+LLM 本地权重目录由参数 `--local_path` 指定，默认值见参数表。
+
+## 最小可运行配置 | Minimal runnable configs
+
+### 1) 训练（forecast）
+
+    python run.py \
+      --task_name forecast --is_training 1 --model_id demo --model autotimes \
+      --data BJTU --root_path <TRAIN_ROOT> --data_path <TRAIN_CSV> \
+      --n_vars 3 --seq_len 2880 --input_token_len 96 --output_token_len 96 \
+      --batch_size 32 --train_epochs 10 --gpu 0 \
+      --llm_model LLAMA --local_path <LLM_WEIGHTS_DIR>
+
+### 2) 校准 + 批量异常检测（forecast_test_all2）
+
+    python run.py \
+      --task_name forecast_test_all2 --is_training 0 --model_id demo --model autotimes \
+      --data BJTU --root_path <TEST_ROOT> --test_dir <CHECKPOINT_DIR_NAME> \
+      --test_file_name checkpoint.pth --n_vars 3 \
+      --seq_len 2880 --input_token_len 96 --output_token_len 96 \
+      --test_seq_len 2880 --test_pred_len 96 --batch_size 32 --gpu 0 \
+      --percentile 99 --vote_rate 1.0 --llm_model LLAMA --local_path <LLM_WEIGHTS_DIR>
+
+### 3) 一次性参数寻优（forecast_test_all3）
+
+    python run.py \
+      --task_name forecast_test_all3 --is_training 0 --model_id demo --model autotimes \
+      --data BJTU --root_path <TEST_ROOT> --test_dir <CHECKPOINT_DIR_NAME> \
+      --test_file_name checkpoint.pth --n_vars 3 \
+      --seq_len 2880 --input_token_len 96 --output_token_len 96 \
+      --test_seq_len 2880 --test_pred_len 96 --batch_size 32 --gpu 0 \
+      --llm_model LLAMA --local_path <LLM_WEIGHTS_DIR>
+
+说明：`--vote_rate` 在命令行以百分比输入，内部会除以 100 转为比例。
+
+## 推荐默认参数组合 | Recommended presets
+
+### 训练（forecast）起点建议
+- 基于默认值 + BJTU 常用时序长度：`--seq_len 2880`、`--input_token_len 96`、`--output_token_len 96`
+- 通道数：`--n_vars` 设为数据维度
+- 模型：`--model autotimes`，LLM 权重目录由 `--local_path` 指定
+
+### 异常检测（forecast_test_all2）起点建议
+- `--percentile 99` 与 `--vote_rate 1.0` 作为初始阈值
+- `--test_dir` 指向训练产出的 checkpoint 目录名
+
+## 参数表 | Parameter tables
+
+### 表 1：基础与数据参数 | Basic & data parameters
+
+| 参数 | 默认值 | 说明（中文） | Description (EN) | 来源 |
+| --- | --- | --- | --- | --- |
+| `task_name` | forecast | 任务模式 | Task mode | [run.py](run.py) |
+| `is_training` | 1 | 1 训练，0 仅测试 | 1=train, 0=test only | [run.py](run.py) |
+| `model_id` | test | 实验标识 | Experiment id | [run.py](run.py) |
+| `model` | timer_xl | 模型名称 | Model name | [run.py](run.py) |
+| `seed` | 2021 | 随机种子 | Random seed | [run.py](run.py) |
+| `data` | ETTh1 | 数据集标识 | Dataset key | [run.py](run.py) |
+| `root_path` | ./dataset/ETT-small/ | 数据根目录 | Dataset root | [run.py](run.py) |
+| `data_path` | ETTh1.csv | 数据文件 | Data file | [run.py](run.py) |
+| `checkpoints` | ./checkpoints/ | 模型保存目录 | Checkpoint directory | [run.py](run.py) |
+| `test_flag` | T | 测试域标识 | Test domain flag | [run.py](run.py) |
+| `seq_len` | 672 | 输入序列长度 | Input sequence length | [run.py](run.py) |
+| `input_token_len` | 576 | 输入 token 长度 | Input token length | [run.py](run.py) |
+| `output_token_len` | 96 | 输出 token 长度 | Output token length | [run.py](run.py) |
+| `test_seq_len` | 672 | 测试输入长度 | Test input length | [run.py](run.py) |
+| `test_pred_len` | 96 | 测试预测长度 | Test prediction length | [run.py](run.py) |
+| `dropout` | 0.1 | Dropout 概率 | Dropout ratio | [run.py](run.py) |
+| `e_layers` | 1 | 编码层数 | Encoder layers | [run.py](run.py) |
+| `d_model` | 512 | 模型维度 | Model width | [run.py](run.py) |
+| `n_heads` | 8 | 注意力头数 | Attention heads | [run.py](run.py) |
+| `d_ff` | 2048 | FFN 维度 | FFN dimension | [run.py](run.py) |
+| `activation` | relu | 激活函数 | Activation | [run.py](run.py) |
+| `covariate` | False | 是否使用协变量 | Use covariates | [run.py](run.py) |
+| `node_num` | 100 | 节点数量 | Node count | [run.py](run.py) |
+| `node_list` | 23,37,40 | 节点划分列表 | Node list | [run.py](run.py) |
+| `use_norm` | False | 是否使用归一化 | Use normalization | [run.py](run.py) |
+| `nonautoregressive` | False | 是否非自回归 | Non-autoregressive | [run.py](run.py) |
+| `test_dir` | ./test | 测试模型目录名 | Checkpoint folder name | [run.py](run.py) |
+| `test_file_name` | checkpoint.pth | 测试模型文件 | Checkpoint file | [run.py](run.py) |
+| `output_attention` | False | 输出注意力 | Output attention | [run.py](run.py) |
+| `visualize` | False | 输出可视化 | Save plots | [run.py](run.py) |
+| `flash_attention` | False | 使用 FlashAttention | Use flash attention | [run.py](run.py) |
+| `adaptation` | False | 是否加载预训练权重 | Enable adaptation | [run.py](run.py) |
+| `pretrain_model_path` | pretrain_model.pth | 预训练模型路径 | Pretrained weight path | [run.py](run.py) |
+| `subset_rand_ratio` | 1 | 少样本比例 | Few-shot ratio | [run.py](run.py) |
+| `n_vars` | 7 | 变量/通道数 | Variable count | [run.py](run.py) |
+| `factor` | 2 | 隐层扩展倍数 | Expansion factor | [run.py](run.py) |
+| `mode` | mix_channel | TTM 模式 | TTM mode | [run.py](run.py) |
+| `AP_levels` | 0 | Attention patching 层数 | AP levels | [run.py](run.py) |
+| `use_decoder` | True | TTM decoder 开关 | Use decoder | [run.py](run.py) |
+| `d_mode` | common_channel | TTM 通道模式 | TTM channel mode | [run.py](run.py) |
+| `layers` | 8 | TTM 层数 | TTM layers | [run.py](run.py) |
+| `hidden_dim` | 16 | TTM 隐层维度 | TTM hidden dim | [run.py](run.py) |
+
+### 表 2：训练与优化参数 | Training & optimization
+
+| 参数 | 默认值 | 说明（中文） | Description (EN) | 来源 |
+| --- | --- | --- | --- | --- |
+| `num_workers` | 10 | 数据加载线程数 | DataLoader workers | [run.py](run.py) |
+| `itr` | 1 | 重复实验次数 | Repeated runs | [run.py](run.py) |
+| `train_epochs` | 10 | 训练轮数 | Training epochs | [run.py](run.py) |
+| `batch_size` | 32 | 批大小 | Batch size | [run.py](run.py) |
+| `patience` | 3 | 早停耐心 | Early stopping patience | [run.py](run.py) |
+| `learning_rate` | 0.0001 | 学习率 | Learning rate | [run.py](run.py) |
+| `des` | test | 实验描述 | Experiment tag | [run.py](run.py) |
+| `loss` | MSE | 损失函数 | Loss name | [run.py](run.py) |
+| `lradj` | type1 | 学习率调度 | LR schedule | [run.py](run.py) |
+| `cosine` | False | 使用 CosineAnnealing | Use cosine annealing | [run.py](run.py) |
+| `tmax` | 10 | CosineAnnealing 的 T_max | T_max for cosine | [run.py](run.py) |
+| `weight_decay` | 0 | 权重衰减 | Weight decay | [run.py](run.py) |
+| `valid_last` | False | 验证时只用尾段 | Validate on tail | [run.py](run.py) |
+| `last_token` | False | 仅使用最后通道 | Use last token | [run.py](run.py) |
+
+### 表 3：异常检测参数 | Anomaly detection
+
+| 参数 | 默认值 | 说明（中文） | Description (EN) | 来源 |
+| --- | --- | --- | --- | --- |
+| `percentile` | 99 | 点级阈值分位数 | Point threshold percentile | [run.py](run.py), [exp/exp_AnomalyDetection.py](exp/exp_AnomalyDetection.py) |
+| `vote_rate` | 1.0 | 样本异常投票率（百分比） | Vote rate in percent | [run.py](run.py), [exp/exp_AnomalyDetection.py](exp/exp_AnomalyDetection.py) |
+| `method` | mad | 异常判别方法 | Detection method | [exp/testall_exp_anomaly_detection.py](exp/testall_exp_anomaly_detection.py) |
+| `alpha` | 3.5 | MAD 阈值系数 | MAD threshold factor | [exp/testall_exp_anomaly_detection.py](exp/testall_exp_anomaly_detection.py) |
+| `q` | 0.995 | Quantile 阈值 | Quantile threshold | [exp/testall_exp_anomaly_detection.py](exp/testall_exp_anomaly_detection.py) |
+| `only_idx` | -1 | 仅在指定通道检测 | Detect only one channel | [exp/testall_exp_anomaly_detection.py](exp/testall_exp_anomaly_detection.py) |
+
+### 表 4：LLM 与硬件参数 | LLM & hardware
+
+| 参数 | 默认值 | 说明（中文） | Description (EN) | 来源 |
+| --- | --- | --- | --- | --- |
+| `gpu` | 0 | GPU 编号 | GPU id | [run.py](run.py) |
+| `ddp` | False | 分布式训练 | Distributed data parallel | [run.py](run.py) |
+| `dp` | False | 数据并行 | Data parallel | [run.py](run.py) |
+| `devices` | 0,1,2,3 | 多卡设备列表 | Multi-GPU device ids | [run.py](run.py) |
+| `gpt_layers` | 6 | GPT 层数 | GPT layers | [run.py](run.py) |
+| `patch_size` | 16 | Patch 大小 | Patch size | [run.py](run.py) |
+| `kernel_size` | 25 | 卷积核大小 | Kernel size | [run.py](run.py) |
+| `stride` | 8 | Patch stride | Patch stride | [run.py](run.py) |
+| `ts_vocab_size` | 1000 | Time-LLM 原型词表 | Time-LLM prototype vocab | [run.py](run.py) |
+| `domain_des` | Electricity Transformer Temperature 描述 | 领域描述文本 | Domain description | [run.py](run.py) |
+| `llm_model` | LLAMA | LLM 类型 | LLM backbone | [run.py](run.py) |
+| `llm_layers` | 6 | LLM 层数 | LLM layers | [run.py](run.py) |
+| `local_path` | /home/ubuntu/hsz/models | 本地 LLM 权重根目录 | LLM weights root | [run.py](run.py) |
+
+## 缺失但需存在的参数 | Required but missing args
+
+下列参数在标准基准数据集分支中会被读取，但未在 [run.py](run.py) 中显式定义。若使用标准基准数据集，请在外部补齐或在代码中加入默认值。
+
+The following args are required by the benchmark datasets but are not defined in [run.py](run.py). Provide them externally or add defaults when using benchmark datasets.
+
+- `embed`：时间编码方式
+- `label_len`：label 序列长度
+- `pred_len`：预测序列长度
+- `features`：特征模式（M/S/MS）
+- `target`：目标列名
+- `seasonal_patterns`：季节性模式
+- `freq`：时间频率
+
+来源： [data_provider/data_factory.py](data_provider/data_factory.py)
+
+## 结果文件解释 | Output artifacts
+
+- 训练检查点：checkpoints/<setting>/checkpoint.pth
+- 训练评估指标：result_long_term_forecast.txt
+- 批量异常检测汇总：test_results/<setting>/result_summary.txt
+- 异常标记数组：test_results/<setting>/<csv>_flags.npy
+- 自动寻优最佳结果：test_results/<setting>/best_results.npy
+
+对应目录与文件： [checkpoints/](checkpoints/), [test_results/](test_results/), [result_long_term_forecast.txt](result_long_term_forecast.txt)
+
+## 项目结构 | Project structure
+
+- 入口脚本：[run.py](run.py)
+- 实验逻辑：[exp/](exp/)
+- 数据加载：[data_provider/](data_provider/)
+- 模型实现：[models/](models/)
+
+## 注意事项 | Notes
+
+- `--vote_rate` 为百分比输入，内部会除以 100 转为比例。
+- BJTU 数据集读取逻辑为无表头 CSV，训练/验证集采用 80/20 切分。
 # 基于OpenLTM的时序大模型异常检测功能：包含timerXL系列的异常检测功能实现，以及autotimes功能的实现。
 
 使用环境 conda activate openltm 
