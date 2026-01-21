@@ -470,7 +470,7 @@ zstd                      1.5.6                hc292b87_0
 
 ## 整体结构
 
-- 入口： [run.py](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 统一解析参数、设随机种子、选择任务分支（forecast / forecast_test_all / forecast_test_all2 / forecast_test_all3），并将 vote_rate 从百分比换算为比例。
+- 入口： [run.py] 统一解析参数、设随机种子、选择任务分支（forecast / forecast_test_all / forecast_test_all2 / forecast_test_all3），并将 vote_rate 从百分比换算为比例。
 - 训练与基础推理： exp/exp_forecast.py 负责模型构建、优化器/损失选择、训练循环、验证与测试推理，支持 DDP/DP。
 
 - 数据加载： data_provider/data_factory.py 负责数据集选择与别名映射；为 BJTU 异常数据集提供专门分支，透传 test_data_path、scaler 等自定义参数。
@@ -669,10 +669,9 @@ exp中调用train_loader = data_provider(args, flag='train')
 
 ## **autotimes.py（模型层）**
 
-- 输入：[x_enc](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 形状 [B, L, M]，[x_mark_enc/x_mark_dec](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 未使用（占位）。
+- 输入：[x_enc]形状 [B, L, M]，[x_mark_enc/x_mark_dec]未使用（占位）。
 - 逻辑：
   1. 禁用 transformers 的安全加载检查（覆盖 check_torch_load_is_safe）。
-  2. [_get_inner_model](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 从本地 [local_path](vscode-file://vscode-app/c:/Users/黄胜泽/Desktop/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 读取 Llama/OPT/GPT2（默认 OPT-125m），fallback 到在线 ID。自动对齐 hidden_dim。
   3. 冻结 LLM 参数，仅训练 tokenizer/decoder（Linear 或 MLP）。
   4. 前向：按变量展开 → patch 切分（size=input_token_len，step 同步）→ encoder → LLM（输出 hidden_states[-1]）→ decoder → 还原形状 [B, L', M]，可选去标准化。
 - 输出：预测序列，形状与输入时间维匹配（token_len 及解码长度决定）。
